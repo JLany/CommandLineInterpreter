@@ -12,35 +12,47 @@ public class Terminal {
     private static Parser parser = new Parser();
     private static Path currentDirFullPath = Paths.get(System.getProperty("user.dir"));
     private static final String ErrorPrefix = "-terminal: ";
+    private static boolean run;
 
     public static void main(String[] args) {
-        boolean run = true;
-
+        run = true;
+        var in = new Scanner(System.in);
+        
         while (run) {
             System.out.print(currentDirFullPath.toString() + ">");
+
+            var input = in.nextLine();
+
+            boolean isValidInput = parser.parse(input);
+
+            if (!isValidInput) {
+                System.out.printf("%s%s: command not found\n", ErrorPrefix, parser.getCommandName());
+                continue;
+            }
+
             chooseCommandAction();
         }
+        
+        in.close();
     }
 
     public static void chooseCommandAction() {
-        var in = new Scanner(System.in);
-        var input = in.nextLine();
-        if (input.isBlank()) {
-            return;
-        }
-
-        boolean isValidInput = parser.parse(input);
-        if (!isValidInput) {
-            System.out.printf("%s%s: command not found\n", ErrorPrefix, parser.getCommandName());
-            return;
-        }
-
         var command = parser.getCommandName();
-        if (command.compareTo("cd") == 0) {
-            currentDirFullPath = Paths.get(System.getProperty("user.home"));
-        }
 
-        in.close();
+        if (command.isBlank()) {
+            return;
+        }
+        switch (command) {
+            case "cd":
+                currentDirFullPath = Paths.get(System.getProperty("user.home"));
+                break;
+            case "exit":
+                run = false;
+                break;
+            default:
+                System.out.printf("%s%s: command not found", ErrorPrefix, command);
+        } 
+        
     }
 
     // Commands.
