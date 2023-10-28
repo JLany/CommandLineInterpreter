@@ -53,13 +53,18 @@ public class Terminal {
             case "ls":
                 ls(parser.getArgs());
                 break;
+            case "echo":
+                echo(parser.getArgs());
+                break;
+            case "mkdir":
+                mkdir(parser.getArgs());
+                break;
             case "exit":
                 run = false;
                 break;
             default:
                 printe(command);
         }
-
     }
 
     // Commands.
@@ -113,6 +118,35 @@ public class Terminal {
             }
         } else {
             System.out.println("Invalid arguments");
+        }
+    }
+
+    public static void echo(List<String> args) {
+        for (String string : args) {
+            System.out.println(string);
+        }
+    }
+
+    public static void mkdir(List<String> args) {
+        for (String string : args) {
+            String directoryPath = string;
+
+            if (!Paths.get(directoryPath).isAbsolute()) {
+                directoryPath = currentDirFullPath.toAbsolutePath() + "/" + directoryPath;
+            }
+
+            File file = new File(directoryPath);
+
+            if (file.isDirectory()) {
+                System.out.println("Directory already exists");
+            } else {
+                try {
+                    Path path = Paths.get(directoryPath);
+                    Files.createDirectories(path);
+                } catch (IOException e) {
+                    System.err.println("Failed to create directories");
+                }
+            }
         }
     }
 }
