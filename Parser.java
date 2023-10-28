@@ -1,21 +1,26 @@
+import java.util.List;
+import java.util.ArrayList;
+
 class Parser {
     private String commandName;
-    private String[] args;
+    private List<String> args;
 
     // This method will divide the input into commandName and args
     // where "input" is the string command entered by the user.
     public boolean parse(String input) {
+        commandName = "";
+        args = new ArrayList<>();
+        
         String[] commandSections = input.trim().split(" ");
 
-        if (commandSections.length > 0) {
-            commandName = commandSections[0];
+        if (commandSections.length < 0) {
+            return true;
         }
 
-        if (!(commandName.contains("cd") || commandName.contains("exit") || commandName.isBlank()))
-            return false;
+        commandName = commandSections[0];
 
-        for (int i = 1; i < 0; ++i) {
-            args[i] = commandSections[i];
+        for (int i = 1; i < commandSections.length; ++i) {
+            args.add(commandSections[i]);
         }
 
         return true;
@@ -25,7 +30,7 @@ class Parser {
         return commandName;
     }
 
-    public String[] getArgs() {
+    public List<String> getArgs() {
         return args;
     }
 }

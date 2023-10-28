@@ -1,5 +1,6 @@
 import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.io.IOException;
 import java.util.List;
@@ -25,11 +26,6 @@ public class Terminal {
 
             boolean isValidInput = parser.parse(input);
 
-            if (!isValidInput) {
-                System.out.printf("%s%s: command not found\n", ErrorPrefix, parser.getCommandName());
-                continue;
-            }
-
             chooseCommandAction();
         }
         
@@ -44,44 +40,47 @@ public class Terminal {
         }
         switch (command) {
             case "cd":
-                currentDirFullPath = Paths.get(System.getProperty("user.home"));
+                cd(parser.getArgs());
+                break;
+            case "pwd":
+                System.out.printf("%s\n", pwd());
                 break;
             case "exit":
                 run = false;
                 break;
             default:
-                System.out.printf("%s%s: command not found", ErrorPrefix, command);
+                printe(command);;
         } 
         
     }
 
     // Commands.
     public static String pwd() {
-        return "";
+        return currentDirFullPath.toString();
     }
 
-    // public static String ls(String arg) {
-    //     try {
-    //         currentDirFullPath = Paths.get(System.getProperty("user.dir"));
-    //         List<String> entries = getFilesAndDirectories(currentDirFullPath);
+    public static void cd(List<String> args) {
+        Path inputPath;
 
-    //         return "";
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
+        if (args.size() < 1) {
+            inputPath = Paths.get(System.getProperty("user.home"));
+        } else {
+            inputPath = Paths.get(args.get(0));
+        }
 
-    //     return "";
-    // }
+        inputPath = currentDirFullPath.resolve(inputPath);
+        
+        try {
+            inputPath = inputPath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+        }
+        catch (IOException e) {
+            printe("the path you specified");
+        }
 
-    // private static List<String> getFilesAndDirectories(Path directory) throws IOException {
-    //     try (DirectoryStream<Path> stream = 
-    //             Files.newDirectoryStream(directory,
-    //                     (entry) -> Files.isDirectory(entry) || Files.isRegularFile(entry))) {
-    //         return stream
-    //             .map(Path::getFileName)
-    //             .map(Path::toString)
-    //             .sorted()
-    //             .collect(Collectors.toList());
-    //     }
-    // }
+        currentDirFullPath = inputPath;
+    }
+    
+    public static void printe(String arg) {
+        System.out.printf("%s%s: not found\n", ErrorPrefix, arg);
+    }
 }
