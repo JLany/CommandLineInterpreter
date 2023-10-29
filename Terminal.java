@@ -43,6 +43,7 @@ public class Terminal {
         if (command.isBlank()) {
             return;
         }
+        
         switch (command) {
             case "cd":
                 cd(parser.getArgs());
