@@ -43,13 +43,13 @@ public class Terminal {
         if (command.isBlank()) {
             return;
         }
-        
+
         switch (command) {
             case "cd":
                 cd(parser.getArgs());
                 break;
             case "pwd":
-                System.out.printf("%s\n", pwd());
+                pwd();
                 break;
             case "ls":
                 ls(parser.getArgs());
@@ -69,8 +69,8 @@ public class Terminal {
     }
 
     // Commands.
-    public static String pwd() {
-        return currentDirFullPath.toString();
+    public static void pwd() {
+        parser.writeOutput("%s\n", currentDirFullPath.toString());
     }
 
     public static void cd(List<String> args) {

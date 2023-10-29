@@ -1,8 +1,10 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.FileWriter;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,8 +40,8 @@ class Parser {
 
         int i;
         for (i = 1; i < commandSections.size(); ++i) {
-            if (commandSections.get(i).equals(">>") 
-                || commandSections.get(i).equals(">")) {
+            if (commandSections.get(i).equals(">>")
+                    || commandSections.get(i).equals(">")) {
                 break;
             }
 
@@ -48,7 +50,6 @@ class Parser {
 
         // Continue parsing the sections of the redirection.
         if (i < commandSections.size()) {
-            i++;
             // Either is guarnteed to excute (mutually exclusive).
             if (commandSections.get(i).equals(">>")) {
                 outputDirection = OutputDirection.Append;
@@ -56,11 +57,14 @@ class Parser {
                 outputDirection = OutputDirection.Overwrite;
             }
 
+            // Go to next command part.
+            i++;
+
             try {
                 Path inputPath = Paths.get(commandSections.get(i));
                 Path fileName = inputPath.getFileName();
 
-                outputFilePath = inputPath.getParent()
+                outputFilePath = inputPath.toAbsolutePath().getParent()
                         .toRealPath(LinkOption.NOFOLLOW_LINKS)
                         .resolve(fileName);
             } catch (IOException e) {
@@ -89,11 +93,19 @@ class Parser {
     }
 
     public void writeOutput(String format, Object... args) {
-        if (outputDirection == OutputDirection.Screen) {
+        if (outputDirection.equals(OutputDirection.Screen)) {
             System.out.printf(format, args);
             return;
         }
 
-        
+        PrintWriter printer;
+        boolean append = outputDirection.equals(OutputDirection.Append);
+        try {
+            printer = new PrintWriter(new FileWriter(outputFilePath.toFile(), append));
+            printer.printf(format, args);
+            printer.close();
+        } catch (IOException e) {
+            System.out.printf("Could not write to file: '%s'\n", outputFilePath.toString());
+        }
     }
 }
