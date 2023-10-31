@@ -92,7 +92,7 @@ class Parser {
         return args;
     }
 
-    public void writeOutput(String format, Object... args) {
+    public void writef(String format, Object... args) {
         if (outputDirection.equals(OutputDirection.Screen)) {
             System.out.printf(format, args);
             return;
@@ -107,5 +107,9 @@ class Parser {
         } catch (IOException e) {
             System.out.printf("Could not write to file: '%s'\n", outputFilePath.toString());
         }
+    }
+
+    public void write(String output) {
+        writef(output);
     }
 }

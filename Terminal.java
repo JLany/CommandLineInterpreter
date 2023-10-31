@@ -44,12 +44,14 @@ public class Terminal {
             return;
         }
 
+        String output = "";
+
         switch (command) {
             case "cd":
-                cd(parser.getArgs());
+                output = cd(parser.getArgs());
                 break;
             case "pwd":
-                pwd();
+                output = pwd();
                 break;
             case "ls":
                 ls(parser.getArgs());
@@ -66,14 +68,16 @@ public class Terminal {
             default:
                 printe(command);
         }
+
+        parser.write(output);
     }
 
     // Commands.
-    public static void pwd() {
-        parser.writeOutput("%s\n", currentDirFullPath.toString());
+    public static String pwd() {
+        return String.format("%s\n", currentDirFullPath.toString());
     }
 
-    public static void cd(List<String> args) {
+    public static String cd(List<String> args) {
         Path inputPath;
 
         if (args.size() < 1) {
@@ -91,6 +95,7 @@ public class Terminal {
         }
 
         currentDirFullPath = inputPath;
+        return String.format("%s\n", currentDirFullPath.toString());
     }
 
     public static void printe(String arg) {
