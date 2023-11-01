@@ -2,7 +2,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.FileWriter;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.LinkOption;
@@ -20,6 +19,7 @@ class Parser {
     private OutputDirection outputDirection;
     private Path outputFilePath;
     private List<String> args;
+    private List<String> history = new ArrayList<>();
 
     // This method will divide the input into commandName and args
     // where "input" is the string command entered by the user.
@@ -79,6 +79,8 @@ class Parser {
             }
         }
 
+        history.add(input);
+
         // Each command should further investigate the arguments given to them
         // to verify that they meet the requirements of the command to run.
         return isValidInput;
@@ -90,6 +92,10 @@ class Parser {
 
     public List<String> getArgs() {
         return args;
+    }
+
+    public List<String> getHistory() {
+        return history;
     }
 
     public void writef(String format, Object... args) {

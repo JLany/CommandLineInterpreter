@@ -62,6 +62,9 @@ public class Terminal {
             case "mkdir":
                 mkdir(parser.getArgs());
                 break;
+            case "history":
+                output = history();
+                break;
             case "exit":
                 run = false;
                 break;
@@ -154,5 +157,16 @@ public class Terminal {
                 }
             }
         }
+    }
+
+    public static String history() {
+        var commands = parser.getHistory();
+
+        var output = new StringBuilder();
+        for (int i = 0; i < commands.size(); ++i) {
+            output.append(String.format("%d\t%s\n", i + 1, commands.get(i)));
+        }
+
+        return output.toString();
     }
 }
