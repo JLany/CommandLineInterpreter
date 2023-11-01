@@ -54,13 +54,13 @@ public class Terminal {
                 output = pwd();
                 break;
             case "ls":
-                ls(parser.getArgs());
+                output = ls(parser.getArgs());
                 break;
             case "echo":
-                echo(parser.getArgs());
+                output = echo(parser.getArgs());
                 break;
             case "mkdir":
-                mkdir(parser.getArgs());
+                output = mkdir(parser.getArgs());
                 break;
             case "history":
                 output = history();
@@ -105,38 +105,46 @@ public class Terminal {
         System.out.printf("%s%s: not found\n", ErrorPrefix, arg);
     }
 
-    public static void ls(List<String> args) {
+    public static String ls(List<String> args) {
+        StringBuilder formattedOutput = new StringBuilder();
         if (args.size() == 0) {
-            System.out.printf("%-50s %10s\n", "Name", "Last Modified");
+            formattedOutput.append(String.format("%-50s %10s\n", "File Name", "Last Modified"));
+
             for (File file : currentDirFullPath.toFile().listFiles()) {
-                System.out.printf("%-50s %10s", file.getName(), new Date(file.lastModified()));
-                System.out.println();
+                formattedOutput.append(String.format("%-50s %10s\n", file.getName(), new Date(file.lastModified())));
             }
         } else if (args.size() == 1) {
             String directoryPath = currentDirFullPath.toAbsolutePath() + "/" + args.get(0);
             File directory = new File(directoryPath);
 
             if (directory.exists() && directory.isDirectory()) {
-                System.out.printf("%-50s %10s\n", "Name", "Last Modified");
+                formattedOutput.append(String.format("%-50s %10s\n", "File Name", "Last Modified"));
+
                 for (File childFile : directory.listFiles()) {
-                    System.out.printf("%-50s %10s", childFile.getName(), new Date(childFile.lastModified()));
-                    System.out.println();
+                    formattedOutput.append(
+                            String.format("%-50s %10s\n", childFile.getName(), new Date(childFile.lastModified())));
                 }
             } else {
-                System.out.println("Invalid directory path or directory doesn't exist.");
+                formattedOutput.append("Invalid directory path or directory doesn't exist.");
             }
         } else {
-            System.out.println("Invalid arguments");
+            formattedOutput.append("Invalid arguments");
         }
+
+        String output = formattedOutput.toString();
+        return output;
     }
 
-    public static void echo(List<String> args) {
+    public static String echo(List<String> args) {
+        String output = "";
         for (String string : args) {
-            System.out.println(string);
+            output += string + '\n';
         }
+        return output;
     }
 
-    public static void mkdir(List<String> args) {
+    public static String mkdir(List<String> args) {
+        String output = "";
         for (String string : args) {
             String directoryPath = string;
 
@@ -147,16 +155,22 @@ public class Terminal {
             File file = new File(directoryPath);
 
             if (file.isDirectory()) {
-                System.out.println("Directory already exists");
+                output += "Directory already exists\n";
             } else {
                 try {
                     Path path = Paths.get(directoryPath);
-                    Files.createDirectories(path);
+                    output += Files.createDirectories(path).toString() + '\n';
                 } catch (IOException e) {
                     System.err.println("Failed to create directories");
                 }
             }
         }
+
+        return output;
+    }
+
+    public static String rmdir(List<String> args) {
+        return "";
     }
 
     public static String history() {
