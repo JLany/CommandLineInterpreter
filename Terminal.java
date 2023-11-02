@@ -6,10 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.DirectoryStream.Filter;
 import java.util.Scanner;
 
 public class Terminal {
@@ -61,6 +57,12 @@ public class Terminal {
                 break;
             case "mkdir":
                 output = mkdir(parser.getArgs());
+                break;
+            case "rmdir":
+                output = rmdir(parser.getArgs());
+                break;
+            case "rm":
+                output = rm(parser.getArgs());
                 break;
             case "history":
                 output = history();
@@ -114,25 +116,35 @@ public class Terminal {
                 formattedOutput.append(String.format("%-50s %10s\n", file.getName(), new Date(file.lastModified())));
             }
         } else if (args.size() == 1) {
-            String directoryPath = currentDirFullPath.toAbsolutePath() + "/" + args.get(0);
-            File directory = new File(directoryPath);
-
-            if (directory.exists() && directory.isDirectory()) {
+            if (args.get(0).equals("-r")) {
                 formattedOutput.append(String.format("%-50s %10s\n", "File Name", "Last Modified"));
 
-                for (File childFile : directory.listFiles()) {
-                    formattedOutput.append(
-                            String.format("%-50s %10s\n", childFile.getName(), new Date(childFile.lastModified())));
+                File[] files = currentDirFullPath.toFile().listFiles();
+                for (int i = files.length - 1; i >= 0; i--) {
+                    formattedOutput
+                            .append(String.format("%-50s %10s\n", files[i].getName(),
+                                    new Date(files[i].lastModified())));
                 }
             } else {
-                formattedOutput.append("Invalid directory path or directory doesn't exist.");
+                String directoryPath = currentDirFullPath.toAbsolutePath() + "/" + args.get(0);
+                File directory = new File(directoryPath);
+
+                if (directory.exists() && directory.isDirectory()) {
+                    formattedOutput.append(String.format("%-50s %10s\n", "File Name", "Last Modified"));
+
+                    for (File childFile : directory.listFiles()) {
+                        formattedOutput.append(
+                                String.format("%-50s %10s\n", childFile.getName(), new Date(childFile.lastModified())));
+                    }
+                } else {
+                    formattedOutput.append("Invalid directory path or directory doesn't exist.\n");
+                }
             }
         } else {
-            formattedOutput.append("Invalid arguments");
+            formattedOutput.append("Invalid arguments!\n");
         }
 
-        String output = formattedOutput.toString();
-        return output;
+        return formattedOutput.toString();
     }
 
     public static String echo(List<String> args) {
@@ -170,7 +182,61 @@ public class Terminal {
     }
 
     public static String rmdir(List<String> args) {
-        return "";
+        if (args.size() != 1) {
+            return "Invalid arguments!\n";
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        if (args.get(0).equals("*")) {
+            File[] files = currentDirFullPath.toFile().listFiles();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    if (file.delete()) {
+                        stringBuilder.append(String.format("Deleted Directory %s Succesfully\n", file.getName()));
+                    } else {
+                        stringBuilder.append(String.format("Couldn't delete Directory %s\n", file.getName()));
+                    }
+                }
+            }
+        } else {
+            String directoryPath = args.get(0);
+
+            if (!Paths.get(directoryPath).isAbsolute()) {
+                directoryPath = currentDirFullPath.toAbsolutePath() + "/" + directoryPath;
+            }
+
+            File file = new File(directoryPath);
+            if (file.isDirectory()) {
+                if (file.delete()) {
+                    stringBuilder.append(String.format("Deleted Directory %s Succesfully\n", file.getName()));
+                } else {
+                    stringBuilder.append(String.format("Couldn't delete Directory %s\n", file.getName()));
+                }
+            } else {
+                stringBuilder.append(String.format("%s is not a directory!\n", file.getName()));
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public static String rm(List<String> args) {
+        if (args.size() != 1) {
+            return "Invalid arguments!\n";
+        }
+
+        String fileName = args.get(0);
+        File fileToDelete = new File(currentDirFullPath.toAbsolutePath() + File.separator + fileName);
+
+        if (fileToDelete.exists() && fileToDelete.isFile()) {
+            if (fileToDelete.delete()) {
+                return String.format("File %s deleted successfully\n", fileName);
+            } else {
+                return String.format("Failed to delete File %s\n", fileName);
+            }
+        } else {
+            return String.format("File %s does not exist or is not a regular file\n", fileName);
+        }
     }
 
     public static String history() {
