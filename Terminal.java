@@ -64,6 +64,9 @@ public class Terminal {
             case "rm":
                 output = rm(parser.getArgs());
                 break;
+            case "touch":
+                output = touch(parser.getArgs());
+                break;
             case "history":
                 output = history();
                 break;
@@ -236,6 +239,31 @@ public class Terminal {
             }
         } else {
             return String.format("File %s does not exist or is not a regular file\n", fileName);
+        }
+    }
+
+    public static String touch(List<String> args) {
+        if (args.size() != 1) {
+            return "Invalid arguments!\n";
+        }
+
+        String directoryPath = args.get(0);
+
+        if (!Paths.get(directoryPath).isAbsolute()) {
+            directoryPath = currentDirFullPath.toAbsolutePath() + "/" + directoryPath;
+        }
+
+        File file = new File(directoryPath);
+
+        if (file.exists()) {
+            return String.format("File %s already exists\n", file.getName());
+        } else {
+            try {
+                file.createNewFile();
+                return String.format("File %s created successfully\n", file.getName());
+            } catch (IOException e) {
+                return String.format("Failed to create file %s\n", file.getName());
+            }
         }
     }
 
